@@ -1,0 +1,28 @@
+- defaultTab: nodes
+  description: ''
+  executionEnabled: true
+  id: 15460984-1373-4ac4-bf2f-9a6ec66eafc8
+  loglevel: INFO
+  name: Alert manager housekeeping job
+  nodeFilterEditable: false
+  plugins:
+    ExecutionLifecycle: null
+  schedule:
+    dayofmonth:
+      day: '*'
+    month: '*'
+    time:
+      hour: '6'
+      minute: '0'
+      seconds: '0'
+    year: '*'
+  scheduleEnabled: true
+  sequence:
+    commands:
+    - description: step1
+      exec: curl -X POST http://localhost:3500/v1.0/invoke/alert-web/method/management/housekeeping
+    keepgoing: false
+    strategy: node-first
+  timeZone: Asia/Tokyo
+  timeout: '600'
+  uuid: 15460984-1373-4ac4-bf2f-9a6ec66eafc8

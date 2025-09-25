@@ -1,0 +1,85 @@
+services:
+  job-manager:
+    image: rundeck/rundeck:5.12.0
+    container_name: job-manager
+    environment:
+      RUNDECK_DATABASE_DRIVER: org.postgresql.Driver
+      RUNDECK_DATABASE_USERNAME: rundeck
+      RUNDECK_DATABASE_PASSWORD: rundeck
+      RUNDECK_DATABASE_URL: jdbc:postgresql://job-manager-db/rundeck?autoReconnect=true&useSSL=false&allowPublicKeyRetrieval=true
+      RUNDECK_GRAILS_URL: http://localhost:8288
+      RUNDECK_TOKENS_FILE: /var/lib/rundeck/token/tokens.properties
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./share/token:/var/lib/rundeck/token
+    ports:
+      - 8288:4440
+      - 3517:3500
+    networks:
+      - cdim-net
+    depends_on:
+      - job-manager-db
+    logging:
+      options:
+        max-size: 50m
+
+  job-manager-setup:
+    build:
+      context: .
+      dockerfile: ./job-manager-setup/Dockerfile
+    container_name: job-manager-setup
+    networks:
+      - cdim-net
+    depends_on:
+      - job-manager
+    logging:
+      options:
+        max-size: 50m
+
+  job-manager-dapr:
+    image: daprio/daprd:edge
+    container_name: job-manager-dapr
+    command:
+      [
+        "./daprd",
+        "-app-id","job-manager",
+        "-app-port","4440",
+        "-dapr-http-port","3500",
+        "-placement-host-address",
+        "placement:50006"
+      ]
+    depends_on:
+      - job-manager
+    network_mode: "service:job-manager"
+    logging:
+      options:
+        max-size: 50m
+
+  job-manager-db:
+    image: postgres:16-alpine
+    container_name: job-manager-db
+    environment:
+      - POSTGRES_DB=rundeck
+      - POSTGRES_USER=rundeck
+      - POSTGRES_PASSWORD_FILE=/run/secrets/db_password
+      - TZ=Asia/Tokyo
+    volumes:
+      - job-manager-db:/var/lib/postgresql/data
+    networks:
+      - cdim-net
+    logging:
+      options:
+        max-size: 50m
+    secrets:
+      - db_password
+
+volumes:
+  job-manager-db:
+
+networks:
+  cdim-net:
+    external: true
+
+secrets:
+  db_password:
+    file: ./job-manager-db/secrets/POSTGRES_PASSWORD

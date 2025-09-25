@@ -1,0 +1,28 @@
+- defaultTab: nodes
+  description: ''
+  executionEnabled: true
+  id: 9d6fd442-71e3-412d-be58-17487269787a
+  loglevel: INFO
+  name: HW configuration information data linkage job
+  nodeFilterEditable: false
+  plugins:
+    ExecutionLifecycle: null
+  schedule:
+    dayofmonth:
+      day: '*'
+    month: '*'
+    time:
+      hour: '*'
+      minute: '0/10'
+      seconds: '0'
+    year: '*'
+  scheduleEnabled: true
+  sequence:
+    commands:
+    - description: step1
+      exec: curl -X POST http://localhost:3500/v1.0/invoke/configuration-exporter/method/cdim/api/v1/devices/sync
+    keepgoing: false
+    strategy: node-first
+  timeZone: Asia/Tokyo
+  timeout: '600'
+  uuid: 9d6fd442-71e3-412d-be58-17487269787a
