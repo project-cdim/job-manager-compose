@@ -12,6 +12,8 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./share/token:/var/lib/rundeck/token
+      - job-manager-data:/home/rundeck/server/data
+      - job-manager-logs:/home/rundeck/var/logs
     ports:
       - 8288:4440
       - 3517:3500
@@ -19,6 +21,12 @@ services:
       - cdim-net
     depends_on:
       - job-manager-db
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:4440/login || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s # Give Rundeck time to start up before health checks begin
     logging:
       options:
         max-size: 50m
@@ -31,7 +39,8 @@ services:
     networks:
       - cdim-net
     depends_on:
-      - job-manager
+      job-manager:
+        condition: service_healthy
     logging:
       options:
         max-size: 50m
@@ -75,6 +84,8 @@ services:
 
 volumes:
   job-manager-db:
+  job-manager-data:
+  job-manager-logs:
 
 networks:
   cdim-net:

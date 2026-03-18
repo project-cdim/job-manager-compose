@@ -20,7 +20,7 @@
   sequence:
     commands:
     - description: step1
-      exec: curl -X POST http://localhost:3500/v1.0/invoke/alert-web/method/management/housekeeping
+      exec: curl -X POST http://localhost:3500/v1.0/invoke/alert-web/method/management/housekeeping?api-key=***
     keepgoing: false
     strategy: node-first
   timeZone: Asia/Tokyo
